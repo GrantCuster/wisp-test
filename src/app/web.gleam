@@ -1,5 +1,9 @@
 import wisp
 
+pub type Context {
+  Context(static_directory: String)
+}
+
 /// The middleware stack that the request handler uses. The stack is itself a
 /// middleware function!
 ///
@@ -12,11 +16,14 @@ import wisp
 /// 
 pub fn middleware(
   req: wisp.Request,
+  ctx: Context,
   handle_request: fn(wisp.Request) -> wisp.Response,
 ) -> wisp.Response {
   // Permit browsers to simulate methods other than GET and POST using the
   // `_method` query parameter.
   let req = wisp.method_override(req)
+
+  use <- wisp.serve_static(req, under: "/static", from: ctx.static_directory)
 
   // Log information about the request and response.
   use <- wisp.log_request(req)
